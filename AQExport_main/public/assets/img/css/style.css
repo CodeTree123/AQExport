@@ -1,0 +1,13 @@
+ 
+        
+table{
+    border: 1px solid #000 !important;
+    border-collapse: collapse !important;
+    overflow-x: auto;
+}
+table thead{
+    vertical-align: middle !important;
+}
+table thead th{
+    border-bottom: none !important;
+} 

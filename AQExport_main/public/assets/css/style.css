@@ -1,0 +1,105 @@
+ 
+        
+table{
+    border: 1px solid #000 !important;
+    border-collapse: collapse !important;
+    overflow-x: auto;
+}
+table thead{
+    vertical-align: middle !important;
+}
+table thead th{
+    border-bottom: 1px solid #000 !important;
+} 
+table tbody{
+    vertical-align: middle !important;
+}
+/* table tbody tr{
+    border-bottom: none !important;
+    border-style: hidden !important;
+}  */
+.img_preview_content{
+    background: none !important;
+    border: none !important;
+}
+.img_preview_header{
+    border-bottom: none !important;
+}
+.img_preview_header>button>i{
+    font-size: 35px;
+    color: whitesmoke;
+}
+.product_img{
+    width: 100%;
+    height: 80vh;
+    object-fit: contain;
+}
+
+.img_load_view{
+    width: 350px;
+    height: 350px;
+    margin: auto;
+}
+.img_load_view>img{
+    width: 350px;
+    height: 350px;
+}
+
+.nav-link:hover{
+    background-color:  #00b050 !important;
+    border-radius: 5px;
+    color: #fff !important; 
+}
+/* WEBSITE STYLE CSS */
+
+/* WEBSITE STYLE CSS End */
+/* Color for product tables */
+.aq_buyer_detial{
+    background-color:  #00b050 !important;
+}
+.aq_po_info{
+    background-color: #92d050 !important ;
+}
+.aq_buyer_factory{
+    background-color: #ffff00 !important ;
+}
+.aq_buyer_lab_dip{
+    background-color: #bdd7ee !important ;
+}
+.aq_buyer_planning{
+    background-color: #ff99ff !important ;
+}
+.aq_buyer_sampling{
+    background-color: #ffe699 !important ;
+}
+.aq_buyer_accessories{
+    background-color: #66ccff !important ;
+}
+.aq_buyer_fabric_detail{
+    background-color: #99ff99 !important ;
+}
+.aq_buyer_yarn{
+    background-color: #bf8f00 !important ;
+}
+.aq_buyer_knitting{
+    background-color: #ffd966 !important ;
+}
+.aq_buyer_dying{
+    background-color: #a6a6a6 !important ;
+}
+.aq_buyer_fab_store_del{
+    background-color: #a9d08e !important ;
+}
+.aq_buyer_production_status{
+    background-color: #f8cbad !important ;
+}
+.aq_buyer_remarks{
+    background-color: #b69aff !important ;
+}
+.aq_buyer_action{
+    background-color: #A7D2CB !important ;
+}
+.aq_buyer_status{
+    background-color: #FA9494 !important ;
+}
+/*end Color for product tables */
