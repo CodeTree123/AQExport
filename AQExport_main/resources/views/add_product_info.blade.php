@@ -28,7 +28,7 @@
                 <select class="form-select mb-3" aria-label="Default select example" name="buyer_id">
                     <option selected>Open this select menu</option>
                     @foreach($buyers as $buyer)
-                    <option value="{{$buyer->id}}">{{$buyer->name}} - {{$buyer->buyer_contact_name}} - {{$buyer->buyer_country}}</option>
+                    <option value="{{$buyer->user_id}}">{{$buyer->name}} - {{$buyer->buyer_contact_name}} - {{$buyer->buyer_country}}</option>
                     @endforeach
                 </select>
             </div>
@@ -314,7 +314,7 @@
                 <label for="mail_person" class="form-label">Mailed Person</label>
                 <select class="form-control custom-form-control multi" name="mail_person[]" aria-label="Default select example" multiple style="width:100%;" id="mail_person">
                     @foreach($mails as $mail)
-                    <option value="{{$mail->id}}">{{$mail->name}}</option>
+                    <option value="{{$mail->email}}">{{$mail->name}}</option>
                     @endforeach
                 </select>
             </div>

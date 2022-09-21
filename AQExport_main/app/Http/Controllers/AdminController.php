@@ -11,6 +11,8 @@ use App\Models\product_others_info;
 use Session;
 use File;
 use LDAP\Result;
+use Mail;
+use App\Mail\UserMail;
 
 class AdminController extends Controller
 {
@@ -195,7 +197,8 @@ class AdminController extends Controller
         // dd($user);
         $mails = user_info::where('role_id','!=','5')->where('role_id','!=','1')->get();
         // dd($mail);
-        $buyers = user_info::where('role_id','=',"5")->leftJoin('buyer_infos','user_infos.id','=','buyer_infos.user_id')->get();
+        $buyers = user_info::where('user_infos.role_id','=',"5")->leftJoin('buyer_infos','user_infos.id','=','buyer_infos.user_id')->get();
+        // dd($buyers);
 
         return view('add_product_info',compact('buyers','user','mails'));
 
@@ -316,14 +319,14 @@ class AdminController extends Controller
     }
 
     public function product_add_date(Request $request,$u_id){
- dd($request->all());
-        $p_id = $request->p_id;
-        $product_info = product_info::find($p_id);
-        // if(Session::has('loginId')){
+//  dd($request->all());
+    // if(Session::has('loginId')){
         //     $user=user_info::where('id','=',Session::get('loginId'))->first();
         // }
-        
-        // $product_info->lab_received = $request->lab_received;
+    
+        $p_id = $request->p_id;
+        $product_info = product_info::find($p_id);
+        $product_info->lab_received = $request->lab_received;
         $product_info->color_way = $request->color_way;
         $product_info->print_stricke_offs = $request->print_stricke_offs;
         $product_info->comments_received = $request->comments_received;
@@ -379,7 +382,34 @@ class AdminController extends Controller
         $product_other_info->remarks = $request->remarks;
         $product_other_info->update();
 
+        if($request->mail == 1){
+            $product_info = product_info::where('product_infos.id','=',$p_id)
+                    ->leftJoin('user_infos','product_infos.buyer_id','=','user_infos.id')
+                    ->leftJoin('product_others_infos','product_infos.id','=','product_others_infos.proid')
+                ->first(['product_infos.mail_p_ids','user_infos.name','user_infos.email','product_others_infos.remarks']);
+                // dd($product_info);
+            $buyer_mail = $product_info->email;
+            $remarks = $product_info->remarks;
+            $remarks = explode("\r\n",$remarks);
+            if (($key = array_search("", $remarks)) !== false) {
+                unset($remarks[$key]);
+            }
+            $mail_person=$product_info->mail_p_ids;
+            $mail_person=explode(',',$mail_person);
+
+    
+            // dd($mail_person,$remarks);
+            $mailData = [
+                'title' => 'Remarkes List',
+                'body' => $remarks,
+            ];
+     
+            Mail::to($buyer_mail)->cc($mail_person)->send(new UserMail($mailData));
+            
+            // dd("Email is sent successfully.");
+        }
         return redirect(route('product_all_details',[$u_id,$p_id]));
+
 
     }
 
@@ -501,6 +531,33 @@ class AdminController extends Controller
             $product_other_info->shipment_finish = $request->shipment_finish;
             $product_other_info->remarks = $request->remarks;
             $product_other_info->update();
+            
+            if($request->mail == 1){
+                $product_info = product_info::where('product_infos.id','=',$p_id)
+                        ->leftJoin('user_infos','product_infos.buyer_id','=','user_infos.id')
+                        ->leftJoin('product_others_infos','product_infos.id','=','product_others_infos.proid')
+                    ->first(['product_infos.mail_p_ids','user_infos.name','user_infos.email','product_others_infos.remarks']);
+                    // dd($product_info);
+                $buyer_mail = $product_info->email;
+                $remarks = $product_info->remarks;
+                $remarks = explode("\r\n",$remarks);
+                if (($key = array_search("", $remarks)) !== false) {
+                    unset($remarks[$key]);
+                }
+                $mail_person=$product_info->mail_p_ids;
+                $mail_person=explode(',',$mail_person);
+    
+        
+                // dd($mail_person,$remarks);
+                $mailData = [
+                    'title' => 'Remarkes List',
+                    'body' => $remarks,
+                ];
+         
+                Mail::to($buyer_mail)->cc($mail_person)->send(new UserMail($mailData));
+                
+                // dd("Email is sent successfully.");
+            }
 
         return redirect(route('product_all_details',[$u_id,$p_id]));
         // return redirect()->back();

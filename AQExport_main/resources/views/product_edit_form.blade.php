@@ -366,9 +366,16 @@
                 <textarea class="form-control" id="remarks" name="remarks" rows="2">{{$product_info->remarks}}</textarea>
             </div>
         </div>
+        <h6>Do You Want To Send Mail? Please Check Send Mail.</h6>
+        <div class="form-check my-3">
+            <input class="form-check-input" type="checkbox" value="1" id="flexCheckChecked" name="mail">
+            <label class="form-check-label" for="flexCheckChecked">
+                Send Mail 
+            </label>
+        </div>
 
-        <button type="submit" class="btn btn-success">Update</button>
-        <a href="{{route('product_all_details',[$user->id,$product_info->id])}}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-success mt-2">Update</button>
+        <a href="{{route('product_all_details',[$user->id,$product_info->id])}}" class="btn btn-secondary mt-2">Cancel</a>
     </form>
     
     @include('include.footer')
