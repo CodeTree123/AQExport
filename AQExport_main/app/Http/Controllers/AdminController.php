@@ -163,7 +163,7 @@ class AdminController extends Controller
         if($user->role_id == 5){
         $products = product_info::leftJoin('user_infos','product_infos.buyer_id','=','user_infos.id')->leftJoin('buyer_infos','user_infos.id','=','buyer_infos.user_id')->leftJoin('product_others_infos','product_infos.id','=','product_others_infos.proid')->where('product_infos.buyer_id','=',$u_id)->get(['product_infos.*','user_infos.name','buyer_infos.buyer_contact_name','buyer_infos.buyer_country','product_others_infos.*']);
         }else{
-            $products = product_info::leftJoin('user_infos','product_infos.buyer_id','=','user_infos.id')->leftJoin('buyer_infos','user_infos.id','=','buyer_infos.user_id')->leftJoin('product_others_infos','product_infos.id','=','product_others_infos.proid')->where('product_infos.status','=','0')->get(['product_infos.*','user_infos.name','buyer_infos.buyer_contact_name','buyer_infos.buyer_country','product_others_infos.*']);
+            $products = product_info::leftJoin('user_infos','product_infos.buyer_id','=','user_infos.id')->leftJoin('buyer_infos','user_infos.id','=','buyer_infos.user_id')->leftJoin('product_others_infos','product_infos.id','=','product_others_infos.proid')->where('product_infos.status','=','0')->orderBy('name')->get(['product_infos.*','user_infos.name','buyer_infos.buyer_contact_name','buyer_infos.buyer_country','product_others_infos.*']);
         }
         // dd($products);
 
@@ -178,10 +178,14 @@ class AdminController extends Controller
                 ->leftJoin('product_others_infos','product_infos.id','=','product_others_infos.proid')
             ->first(['product_infos.*','user_infos.name','buyer_infos.buyer_contact_name','buyer_infos.buyer_country','product_others_infos.*']);
             // $remarks =[];
+            if($product_info->remarks != null){
             $remark = $product_info->remarks;
             $remarks = explode("\r\n",$remark);
             if (($key = array_search("", $remarks)) !== false) {
                 unset($remarks[$key]);
+            }
+            }else{
+                $remarks[] = "No Remarks";
             }
 
             // dd($product_info,$remark,$remarks);
@@ -386,7 +390,8 @@ class AdminController extends Controller
             $product_info = product_info::where('product_infos.id','=',$p_id)
                     ->leftJoin('user_infos','product_infos.buyer_id','=','user_infos.id')
                     ->leftJoin('product_others_infos','product_infos.id','=','product_others_infos.proid')
-                ->first(['product_infos.mail_p_ids','user_infos.name','user_infos.email','product_others_infos.remarks']);
+                    ->leftJoin('buyer_infos','user_infos.id','=','buyer_infos.user_id')
+                ->first(['product_infos.mail_p_ids','product_infos.style','product_infos.product_name','product_infos.quantity','user_infos.name','user_infos.email','product_others_infos.remarks','buyer_infos.buyer_contact_name']);
                 // dd($product_info);
             $buyer_mail = $product_info->email;
             $remarks = $product_info->remarks;
@@ -395,6 +400,12 @@ class AdminController extends Controller
                 unset($remarks[$key]);
             }
             $mail_person=$product_info->mail_p_ids;
+            $style = $product_info->style;
+            $product_name = $product_info->product_name;
+            $quantity = $product_info->quantity;
+            $buyer_contact_name = $product_info->buyer_contact_name;
+
+            $sub = $style.'-'.$product_name.'-'.$quantity.'-'.$buyer_contact_name;
             $mail_person=explode(',',$mail_person);
 
     
@@ -404,7 +415,7 @@ class AdminController extends Controller
                 'body' => $remarks,
             ];
      
-            Mail::to($buyer_mail)->cc($mail_person)->send(new UserMail($mailData));
+            Mail::to($buyer_mail)->cc($mail_person)->send(new UserMail($mailData,$sub));
             
             // dd("Email is sent successfully.");
         }
@@ -536,8 +547,10 @@ class AdminController extends Controller
                 $product_info = product_info::where('product_infos.id','=',$p_id)
                         ->leftJoin('user_infos','product_infos.buyer_id','=','user_infos.id')
                         ->leftJoin('product_others_infos','product_infos.id','=','product_others_infos.proid')
-                    ->first(['product_infos.mail_p_ids','user_infos.name','user_infos.email','product_others_infos.remarks']);
+                        ->leftJoin('buyer_infos','user_infos.id','=','buyer_infos.user_id')
+                    ->first(['product_infos.mail_p_ids','product_infos.style','product_infos.product_name','product_infos.quantity','user_infos.name','user_infos.email','product_others_infos.remarks','buyer_infos.buyer_contact_name']);
                     // dd($product_info);
+                
                 $buyer_mail = $product_info->email;
                 $remarks = $product_info->remarks;
                 $remarks = explode("\r\n",$remarks);
@@ -545,6 +558,13 @@ class AdminController extends Controller
                     unset($remarks[$key]);
                 }
                 $mail_person=$product_info->mail_p_ids;
+                $style = $product_info->style;
+                $product_name = $product_info->product_name;
+                $quantity = $product_info->quantity;
+                $buyer_contact_name = $product_info->buyer_contact_name;
+
+                $sub = $style.'-'.$product_name.'-'.$quantity.'-'.$buyer_contact_name;
+                // dd($sub);
                 $mail_person=explode(',',$mail_person);
     
         
@@ -554,7 +574,7 @@ class AdminController extends Controller
                     'body' => $remarks,
                 ];
          
-                Mail::to($buyer_mail)->cc($mail_person)->send(new UserMail($mailData));
+                Mail::to($buyer_mail)->cc($mail_person)->send(new UserMail($mailData,$sub));
                 
                 // dd("Email is sent successfully.");
             }
@@ -584,9 +604,13 @@ class AdminController extends Controller
     public function product_remarks($id){
         $remark = product_others_info::where('proid','=',$id)->first()->remarks;
         // $remark = $product_info->remarks;
-        $remarks = explode("\r\n",$remark);
-        if (($key = array_search("", $remarks)) !== false) {
-            unset($remarks[$key]);
+        if ($remark != null){
+            $remarks = explode("\r\n",$remark);
+            if (($key = array_search("", $remarks)) !== false) {
+                unset($remarks[$key]);
+            }
+        }else{
+            $remarks[] = "No Remarks";
         }
 
         return response()->json([

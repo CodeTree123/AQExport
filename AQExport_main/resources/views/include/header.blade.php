@@ -29,7 +29,7 @@
                     <a href="/" class="nav-link px-2 link-dark">Website</a>
                 </li>
                 <li>
-                    <a href="{{route('products',[$user->id])}}" class="nav-link px-2 link-dark">Products</a>
+                    <a href="{{route('products',[$user->id])}}" class="nav-link px-2 link-dark">Ship Out Goods</a>
                 </li>
                 @if($user->role_id == 1)
                 <li>

@@ -12,14 +12,16 @@ class UserMail extends Mailable
     use Queueable, SerializesModels;
 
     public $mailData;
+    public $sub;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($mailData)
+    public function __construct($mailData,$sub)
     {
         $this->mailData = $mailData;
+        $this->sub = $sub;
     }
 
     /**
@@ -29,7 +31,7 @@ class UserMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Mail from AQExport.com')
+        return $this->subject($this->sub)
                     ->view('emails.user_mail');
     }
 }
