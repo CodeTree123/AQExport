@@ -13,6 +13,7 @@ use File;
 use LDAP\Result;
 use Mail;
 use App\Mail\UserMail;
+use App\Mail\OrderMail;
 
 class AdminController extends Controller
 {
@@ -259,22 +260,11 @@ class AdminController extends Controller
             $product_info->plannig_lab = $request->plannig_lab;
             $product_info->plannig_sample = $request->plannig_sample;
 
-            // $product_info->color_way = $request->color_way;
-            // $product_info->print_stricke_offs = $request->print_stricke_offs;
-            // $product_info->comments_received = $request->comments_received;
+            $product_info->save();
 
-            // $product_info->style_approval = $request->style_approval;
-            // $product_info->style_comments = $request->style_comments;
-            // $product_info->pp_sample = $request->pp_sample;
-            // $product_info->pp_comments = $request->pp_comments;
-            // $product_info->production_sample = $request->production_sample;
-            // $product_info->production_comments = $request->production_comments;
-
-        $product_info->save();
-
-        $pro_id = product_info::where('random','=',$random)->first()->id;
+            $pro_id = product_info::where('random','=',$random)->first()->id;
             // dd($pro_id);   
-        $product_other_info = new product_others_info();
+            $product_other_info = new product_others_info();
             $product_other_info->proid = $pro_id;
             $product_other_info->accessories_planning = $request->plannig_accessories;
             $product_other_info->yarn_planning = $request->yarn_planning;
@@ -286,24 +276,49 @@ class AdminController extends Controller
             $product_other_info->sewing_planning = $request->sewing_planning;
             $product_other_info->shipment_planning = $request->shipment_planning;
 
-            // $product_other_info->main_label = $request->main_label;
-            // $product_other_info->care_label = $request->care_label;
-            // $product_other_info->size_label = $request->size_label;
-            // $product_other_info->flag_label = $request->flag_label;
-            // $product_other_info->patch_label = $request->patch_label;
-            // $product_other_info->hang_tag = $request->hang_tag;
-            // $product_other_info->hang_tag_string = $request->hang_tag_string;
-            // $product_other_info->draw_string = $request->draw_string;
-            // $product_other_info->eyelet = $request->eyelet;
-            // $product_other_info->elastic = $request->elastic;
-            // $product_other_info->zipper = $request->zipper;
-            // $product_other_info->poly = $request->poly;
-            // $product_other_info->gum_tape = $request->gum_tape;
-            // $product_other_info->carton = $request->carton;
-            // $product_other_info->others = $request->others;
             $product_other_info->save();
 
+            if($request->mail == 1){
+                $product_info = product_info::where('product_infos.id','=',$pro_id)
+                        ->leftJoin('user_infos','product_infos.buyer_id','=','user_infos.id')
+                        ->leftJoin('product_others_infos','product_infos.id','=','product_others_infos.proid')
+                        ->leftJoin('buyer_infos','user_infos.id','=','buyer_infos.user_id')
+                    ->first(['product_infos.mail_p_ids','product_infos.style','product_infos.order_no','product_infos.product_name','product_infos.quantity','user_infos.name','user_infos.email','product_others_infos.remarks','buyer_infos.buyer_contact_name']);
+                    // dd($product_info);
+                $buyer_mail = $product_info->email;
+
+                $mail_person=$product_info->mail_p_ids;
+
+                $mail_person=explode(',',$mail_person);
+
+                $style = $product_info->style;
+
+                $order = $product_info->order_no;
+
+                $product_name = $product_info->product_name;
+
+                $quantity = $product_info->quantity;
+
+                $buyer_contact_name = $product_info->buyer_contact_name;
+    
+                $sub = $style.'-'.$product_name.'-'.$quantity.'-'.$buyer_contact_name;
+        
+                // dd($mail_person,$remarks);
+                $mailData = [
+                    'title' => 'New Order Added Confermation',
+                    'body_style' => $style,
+                    'body_order' => $order,
+                    'body_product' => $product_name,
+                    'body_quantity' => $quantity,
+                    'body_contact' => $buyer_contact_name,
+                ];
+         
+                Mail::to($buyer_mail)->cc($mail_person)->send(new OrderMail($mailData,$sub));
+                
+                // dd("Email is sent successfully.");
+            }
             return redirect()->route('product_details');
+
 
     }
 
@@ -588,9 +603,9 @@ class AdminController extends Controller
 
         $del_product_info = product_info::find($del_product_id);
         $del_product_info->delete();
-        $del_product_other_info = product_others_info::find($del_product_id);
+        $del_product_other_info = product_others_info::where('proid','=',$del_product_id);
         $del_product_other_info->delete();
-        return back();
+        return redirect()->route('product_details');
     }
 
     public function product_img($id){
